@@ -1,7 +1,19 @@
 const puppeteer = require("puppeteer");
+require("dotenv").config();
 
 const scrapeLogic = async (res) => {
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+        asgs: [
+            "--disable-setupid-sandbox",
+            "--no-sandbox",
+            "--single-process",
+            "--no-zygote",
+        ],
+        executablePath:
+            process.env.NODE_ENV === "prodution"
+            ? process.env.PUPPETEER_EXECUTABLE_PATH
+            : puppeteer.executablePath(),
+    });
     try{
             
         const page = await browser.newPage();
@@ -31,6 +43,7 @@ const scrapeLogic = async (res) => {
             res.send(logStatement);
         }catch(e){
             console.error(e);
+            res.send(`Something went wrong while runnig Puppeteer: ${e}`);
         }finally{
             await browser.close();
         }
